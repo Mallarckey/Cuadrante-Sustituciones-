@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuadrante de Sustituciones v20.1.M9 (Correcciones Aplicadas)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        :root {
+            --color-libre: #dff0d8; --color-clase: #f2dede;
+            --color-header: #f5f5f5; --color-border: #ddd; --color-asignado: #fcf8e3;
+            --color-exclusiva: #fffacd; 
+            --color-recreo-guardia: #a0c4ff; 
+            --color-no-lectiva: #f0f0f0;
+            --color-tab-active-bg: #fffbe0; 
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; }
+        .container { max-width: 1400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #0056b3; margin-bottom: 20px;}
+        h2 { text-align: center; color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-top: 30px; margin-bottom:20px;}
+        
+        .app-header {
+            padding: 10px 0px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .app-header .input-group { margin-bottom: 0; width:auto; }
+
+        .tab-navigation {
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 20px;
+            display: flex;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid var(--color-border);
+            border-bottom: none;
+            background-color: #f1f1f1;
+            font-size: 1.1em;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab-button.active {
+            background-color: var(--color-tab-active-bg); 
+            border-color: var(--color-border);
+            border-bottom: 1px solid var(--color-tab-active-bg);
+            position: relative;
+            top: 1px;
+        }
+        .tab-content {
+            display: none; 
+        }
+        .tab-content.active {
+            display: block; 
+        }
+
+        .seccion { margin-bottom: 40px; padding: 20px; border: 1px solid var(--color-border); border-radius: 5px; background-color: #fff; }
+        table { width: auto; max-width: 100%; margin: auto; border-collapse: collapse; font-size: 0.9em; table-layout: fixed; margin-bottom: 15px; }
+        th, td { border: 1px solid var(--color-border); padding: 8px; text-align: center; word-wrap: break-word; }
+        th { background-color: var(--color-header); }
+        
+        .sesion-header { width: 60px; font-weight:bold;}
+        .hora-intervalo-header { width: 90px; font-weight:bold;}
+        .sesion-cell { font-weight: normal; } 
+        .hora-intervalo-cell { font-size: 0.9em; color: #555; }
+
+        .horario-celda { cursor: pointer; transition: transform 0.1s; height: 40px; }
+        .horario-celda:hover { transform: scale(1.05); font-weight: bold; box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 10; position: relative; }
+        .celda-libre { background-color: var(--color-libre); }
+        .celda-clase { background-color: var(--color-clase); }
+        .celda-exclusiva { background-color: var(--color-exclusiva); cursor: not-allowed !important; }
+        .celda-recreo-guardia { background-color: var(--color-recreo-guardia); } 
+        .celda-no-lectiva-fija { background-color: var(--color-no-lectiva); cursor: default; }
+
+        .horarios-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(750px, 1fr)); gap: 30px; }
+        .docente-horario-wrapper { border: 2px solid var(--color-header); border-radius: 8px; padding: 15px; position:relative; }
+        .docente-horario-wrapper h3 { margin-top: 0; text-align: center; background: var(--color-header); padding: 10px; border-radius: 4px; }
+        
+        .input-group { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .input-group label { font-weight: bold; margin-right: 5px; white-space: nowrap; }
+        .input-group input, .input-group select { padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 1em; flex-grow: 1; }
+        .input-group button { cursor: pointer; background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; transition: background-color 0.2s; }
+        .input-group button:hover { background-color: #0056b3; }
+        
+        .checkbox-container { 
+            display: flex; flex-wrap: wrap; gap: 5px 15px;
+            padding: 10px; border: 1px solid var(--color-border); 
+            border-radius: 4px; flex-grow: 2; max-height: 100px; overflow-y: auto;
+        }
+        .checkbox-container label { font-weight: normal; font-size:0.9em; }
+        .checkbox-container .todo-el-dia-label {
+            width: 100%; 
+            margin-bottom: 5px; 
+            border-bottom: 1px solid #eee; 
+            padding-bottom: 5px;
+            display: block; /* Para que ocupe todo el ancho */
+        }
+
+        .lista-docentes ul { list-style: none; padding: 0; }
+        .lista-docentes li { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
+        .lista-docentes .docente-info { display: flex; flex-direction: column; flex-grow:1; }
+        .lista-docentes .docente-info .cargo { font-size: 0.8em; color: #666; }
+        .lista-docentes .acciones-docente button { margin-left: 5px; padding: 4px 8px; font-size:0.85em; }
+        .btn-eliminar { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-reset, .btn-export, .btn-import, .btn-copiar-tabla { background-color: #6c757d; color: white; margin: 5px 0; border:none; padding: 8px 12px; border-radius:3px; cursor:pointer;}
+        .btn-export { background-color: #28a745; }
+        .btn-import { background-color: #17a2b8; }
+        .btn-copiar-tabla { background-color: #5bc0de; margin-top:10px;}
+        #resultadoSustitucion { margin-top: 20px; padding: 15px; border: 1px solid var(--color-border); border-radius: 5px; background-color: #f8f9fa; }
+        #resultadoSustitucion table select { padding: 5px; font-size: 0.9em; border-radius: 3px;}
+        .io-buttons-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        
+        #tablaSustitucionesAsignadas th:first-child, #tablaSustitucionesAsignadas td:first-child { width: 30%; }
+        #tablaSustitucionesAsignadas th:last-child, #tablaSustitucionesAsignadas td:last-child { width: 70%; text-align: left; padding-left: 10px;}
+
+        .ausencia-definicion-bloque {
+            border: 1px dashed #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #fdfdfd;
+        }
+        .ausencia-definicion-bloque .input-group {
+            align-items: flex-start; 
+        }
+        .ausencia-definicion-bloque label { min-width: 120px; }
+        .ausencia-definicion-bloque .checkbox-container { max-height: 100px; }
+        .btn-quitar-ausencia { background-color: #e74c3c !important; font-size: 0.8em !important; padding: 5px 10px !important;}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Cuadrante de Sustituciones v20.1.M9 (Correcciones)</h1> 
+
+    <div class="app-header">
+        <div class="input-group">
+            <label for="periodoActivoSelect">Periodo Lectivo Activo:</label>
+            <select id="periodoActivoSelect"></select>
+        </div>
+    </div>
+
+    <div class="tab-navigation">
+        <button class="tab-button active" data-tab="sustitucionesTab">Sustituciones</button>
+        <button class="tab-button" data-tab="horariosTab">Horarios y Gestión</button>
+    </div>
+
+    <div id="sustitucionesTab" class="tab-content active">
+        <div class="seccion">
+            <h2>1. Asignación de Sustituciones</h2>
+            
+            <div class="input-group">
+                <label for="diaSelect">Día de las Ausencias:</label>
+                <select id="diaSelect"><option value="">Selecciona día...</option></select>
+            </div>
+            <hr>
+            
+            <div id="contenedorDefinicionesAusencia">
+                </div>
+            
+            <button id="btnAnadirAusencia" style="margin-bottom: 20px; background-color: #5cb85c;">+ Añadir Otra Ausencia de Docente</button>
+            
+            <div class="input-group" style="justify-content: center; margin-top:20px;">
+                <button id="procesarTodasAusenciasBtn" style="background-color: #007bff; font-size:1.1em; padding:12px 20px;">Procesar Ausencias Definidas</button>
+                <button id="limpiarResultadosBtn" class="btn-reset" style="background-color: #ffc107; color: black;">Limpiar Resultados</button>
+            </div>
+            <div id="resultadoSustitucion"></div>
+        </div>
+        
+<div class="seccion">
+            <h2>2. Sustituciones Asignadas</h2>
+            <div id="tablaSustitucionesAsignadasHoyContainer">
+                </div>
+            <div style="text-align: center; margin-top: 15px;">
+                <button id="copiarTablaSustitucionesBtn" class="btn-copiar-tabla">Copiar Tabla como Imagen</button>
+            </div>
+        </div>
+
+        <div class="seccion">
+            <h2>3. Registro de Sustituciones</h2>
+            <div style="overflow-x:auto;">
+            <table id="tablaLogSustituciones">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Docente Ausente</th>
+                        <th>Profesor Sustituto</th>
+                        <th>Periodo (Día, Sesión, Hora)</th>
+                        <th>Asignatura/Tarea Sustituida</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody id="logSustitucionesBody"></tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="horariosTab" class="tab-content">
+        <div class="io-buttons-container">
+            <button id="exportBtn" class="btn-export">Exportar Datos</button>
+            <label for="importFile" class="btn-import">Importar Datos</label>
+            <input type="file" id="importFile" style="display: none;" accept=".json">
+        </div>
+
+        <div class="seccion">
+            <h2>3. Gestión de Docentes</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px;">
+                <div>
+<h3>Añadir Docente</h3>
+                    <div class="input-group"><input type="text" id="nombreDocenteInput" placeholder="Nombre y Apellidos"></div>
+                    <div class="input-group"><input type="text" id="cargoDocenteInput" placeholder="Cargo (Ej: Tutor 4ºA)"></div>
+                    <div class="input-group">
+                        <label for="etapaDocenteInput">Etapa Principal:</label>
+                        <select id="etapaDocenteInput">
+                            <option value="Primaria" selected>Primaria</option>
+                            <option value="Infantil">Infantil</option>
+                            </select>
+                    </div>
+<div class="input-group">
+                        <label for="especialidadDocenteInput">Especialidad (AL/PT/Religión):</label>
+                        <select id="especialidadDocenteInput">
+                            <option value="" selected>Ninguna</option>
+                            <option value="AL">AL</option>
+                            <option value="PT">PT</option>
+                            <option value="Religion">Religión</option> {/* Asegúrate de usar un valor consistente, ej: "Religion" */}
+                        </select>
+                    </div>
+                    <button id="addDocenteBtn">Añadir Docente</button>
+                <div class="lista-docentes">
+                    <h3>Lista de Docentes (<span id="contadorDocentes">0</span>)</h3>
+                    <p style="font-size:0.8em; color:#666;">Utiliza los botones para editar o cambiar el orden de visualización.</p>
+                    <ul id="listaDocentes"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="seccion">
+            <h2>4. Editor de Horarios</h2>
+            <p>Haz clic en una celda para cambiar su estado (Libre &harr; Clase/Guardia). Las franjas "Exclusiva" y "Recreo" son editables para guardias.</p>
+            <div id="horariosContainer" class="horarios-container"></div>
+        </div>
+
+        <div class="seccion" style="text-align: center;">
+             <button id="resetAppBtn" class="btn-reset">Borrar Todos los Datos</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM completamente cargado y parseado."); // DEBUG INICIAL
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            tabContents.forEach(content => content.classList.remove('active'));
+            const targetTab = document.getElementById(button.dataset.tab);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+        });
+    });
+    
+    const activeTabButton = document.querySelector('.tab-button.active') || document.querySelector('.tab-button[data-tab="sustitucionesTab"]');
+    if (activeTabButton) {
+        activeTabButton.click();
+    } else {
+        console.warn("No se encontró un botón de pestaña activo por defecto.");
+    }
+
+    const app = {
+        periodosLectivos: { 
+             'oct-may': {
+                nombre: 'Octubre - Mayo',
+                horas: [
+                    { nombre: '1ª', horario: '9:00 - 9:45', esLectiva: true, mapToMasterIndex: 0 },
+                    { nombre: '2ª', horario: '9:45 - 10:30', esLectiva: true, mapToMasterIndex: 1 },
+                    { nombre: 'Recreo', horario: '10:30 - 11:00', esLectiva: true, mapToMasterIndex: 2, esRecreoGuardia: true }, 
+                    { nombre: '3ª', horario: '11:00 - 11:45', esLectiva: true, mapToMasterIndex: 3 },
+                    { nombre: '4ª', horario: '11:45 - 12:30', esLectiva: true, mapToMasterIndex: 4 },
+                    { nombre: 'Exclusiva', horario: '12:30 - 14:30', esLectiva: false, mapToMasterIndex: 5, esExclusiva: true },
+                    { nombre: '5ª', horario: '14:30 - 15:15', esLectiva: true, mapToMasterIndex: 6 },
+                    { nombre: '6ª', horario: '15:15 - 16:00', esLectiva: true, mapToMasterIndex: 7 }
+                ]
+            },
+            'sept': {
+                nombre: 'Septiembre',
+                horas: [
+                    { nombre: '1ª', horario: '9:00 - 9:40', esLectiva: true, mapToMasterIndex: 0 },
+                    { nombre: '2ª', horario: '9:40 - 10:20', esLectiva: true, mapToMasterIndex: 1 },
+                    { nombre: '3ª', horario: '10:20 - 11:00', esLectiva: true, mapToMasterIndex: 3 },
+                    { nombre: 'Recreo', horario: '11:00 - 11:30', esLectiva: true, mapToMasterIndex: 2, esRecreoGuardia: true }, 
+                    { nombre: '4ª', horario: '11:30 - 12:15', esLectiva: true, mapToMasterIndex: 4 },
+                    { nombre: '5ª', horario: '12:15 - 13:00', esLectiva: true, mapToMasterIndex: 6 }
+                ]
+            },
+            'jun': {
+                nombre: 'Junio',
+                horas: [
+                    { nombre: '1ª', horario: '9:00 - 9:40', esLectiva: true, mapToMasterIndex: 0 },
+                    { nombre: '2ª', horario: '9:40 - 10:20', esLectiva: true, mapToMasterIndex: 1 },
+                    { nombre: '3ª', horario: '10:20 - 11:00', esLectiva: true, mapToMasterIndex: 3 },
+                    { nombre: 'Recreo', horario: '11:00 - 11:30', esLectiva: true, mapToMasterIndex: 2, esRecreoGuardia: true },
+                    { nombre: '4ª', horario: '11:30 - 12:15', esLectiva: true, mapToMasterIndex: 4 },
+                    { nombre: '5ª', horario: '12:15 - 13:00', esLectiva: true, mapToMasterIndex: 7 }
+                ]
+            }
+        },
+        periodoActivo: 'oct-may',
+        dias: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"],
+        estadosCelda: ["Libre", "Clase"],
+        datos: { docentes: [], log: [] },
+        resultadosSustitucionActuales: [],
+        numAusenciaDefs: 0,
+
+        init() {
+            console.log("app.init() comenzando..."); 
+            this.determinarPeriodoActivo(); 
+            this.loadData();
+            console.log("app.init(): Llamando a renderPeriodoSelector...");
+            this.renderPeriodoSelector();
+            console.log("app.init(): renderPeriodoSelector llamado.");
+            this.renderDiaSelector(); 
+            this.bindEvents(); 
+            console.log("app.init(): Llamando a render()...");
+            this.render(); 
+            console.log("app.init(): render() llamado.");
+            this.anadirBloqueAusencia(); 
+            this.renderTablaSustitucionesAsignadasHoy();
+            console.log("app.init() finalizado.");
+        },
+        
+        determinarPeriodoActivo() { /* ... sin cambios ... */ },
+        saveData() { localStorage.setItem('datosSustituciones_v51M9_corr2', JSON.stringify(this.datos)); }, 
+        loadData() { 
+            const clavesPosibles = ['datosSustituciones_v51M9_corr2','datosSustituciones_v51M9_corr', 'datosSustituciones_v51M9','datosSustituciones_v51M8', 'datosSustituciones_v51M7', 'datosSustituciones_v51M6', 'datosSustituciones_v51M5', 'datosSustituciones_v51M4', 'datosSustituciones_v51M3', 'datosSustituciones_v51M_corregido', 'datosSustituciones_v51M', 'datosSustitucionesV5'];
+            let datosGuardados = null;
+            for (const clave of clavesPosibles) {
+                datosGuardados = localStorage.getItem(clave);
+                if (datosGuardados) break;
+            }
+
+            if (datosGuardados) {
+                this.datos = JSON.parse(datosGuardados);
+                if (!this.datos.docentes) this.datos.docentes = [];
+                
+                this.datos.docentes.forEach(docente => {
+                    docente.sustitucionesHechas = docente.sustitucionesHechas || 0;
+                    docente.cargo = docente.cargo || "";
+                    const masterHorasDef = this.periodosLectivos['oct-may'].horas;
+                    let horarioNecesitaArreglo = !docente.horario;
+
+                    if (!horarioNecesitaArreglo) {
+                        for (const dia of this.dias) {
+                            if (!docente.horario[dia] || Object.keys(docente.horario[dia]).length !== masterHorasDef.length) {
+                                horarioNecesitaArreglo = true; break;
+                            }
+                            for (const horaMaster of masterHorasDef) {
+                                const masterIdx = horaMaster.mapToMasterIndex;
+                                if (!docente.horario[dia].hasOwnProperty(masterIdx) || typeof docente.horario[dia][masterIdx] !== 'object' || !docente.horario[dia][masterIdx].hasOwnProperty('estado')) {
+                                     horarioNecesitaArreglo = true; break;
+                                }
+                                if (docente.horario[dia][masterIdx].estado === "Guardia") {
+                                    docente.horario[dia][masterIdx].estado = "Libre";
+                                    docente.horario[dia][masterIdx].asignatura = "";
+                                }
+                            }
+                            if (horarioNecesitaArreglo) break;
+                        }
+                    }
+
+                    if (horarioNecesitaArreglo) {
+                        docente.horario = {};
+                        this.dias.forEach(dia => {
+                            docente.horario[dia] = {};
+                            masterHorasDef.forEach(horaMaster => { 
+                                docente.horario[dia][horaMaster.mapToMasterIndex] = { estado: "Libre", asignatura: "" }; 
+                            });
+                        });
+                    }
+                });
+                if (!this.datos.log) this.datos.log = [];
+                this.datos.log.forEach(entry => {
+                    if(entry.sustitucion && !entry.profesorSustituto) {
+                        const partes = entry.sustitucion.split('→');
+                        entry.profesorSustituto = partes[0] ? partes[0].trim() : "N/D";
+                        entry.asignaturaSustituida = partes[1] ? partes[1].trim() : "N/D";
+                        delete entry.sustitucion;
+                    }
+                    entry.observaciones = entry.observaciones || "";
+                });
+            } else {
+                 this.datos = { docentes: [], log: [] };
+            }
+        },
+
+        resetData() { if (confirm("¿Estás seguro? Se borrarán todos los datos.")) { this.datos = { docentes: [], log: [] }; this.resultadosSustitucionActuales = []; this.saveData(); this.render(); document.getElementById('resultadoSustitucion').innerHTML = ''; this.renderTablaSustitucionesAsignadasHoy(); alert("Datos eliminados."); } },
+
+        bindEvents() {
+            console.log("bindEvents() llamado."); // DEBUG
+            document.getElementById('addDocenteBtn').addEventListener('click', () => this.addDocente());
+            document.getElementById('procesarTodasAusenciasBtn').addEventListener('click', () => this.findAndAssignSustituto());
+            document.getElementById('resetAppBtn').addEventListener('click', () => this.resetData());
+            document.getElementById('limpiarResultadosBtn').addEventListener('click', () => { 
+                document.getElementById('resultadoSustitucion').innerHTML = ''; 
+                this.resultadosSustitucionActuales = [];
+                this.renderTablaSustitucionesAsignadasHoy();
+            });
+            document.getElementById('listaDocentes').addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-eliminar')) this.removeDocente(e.target.dataset.index);
+                else if (e.target.classList.contains('btn-editar')) this.editarDocente(e.target.dataset.index);
+                else if (e.target.classList.contains('btn-mover-arriba')) this.moverDocente(e.target.dataset.index, -1);
+                else if (e.target.classList.contains('btn-mover-abajo')) this.moverDocente(e.target.dataset.index, 1);
+            });
+            
+            document.getElementById('horariosContainer').addEventListener('click', (e) => {
+                const celda = e.target.closest('.horario-celda');
+                if (celda && celda.dataset.horaIndexVisual !== undefined) { 
+                    const horaIndexVisual = parseInt(celda.dataset.horaIndexVisual);
+                    this.updateCell(celda.dataset.docenteIndex, celda.dataset.dia, horaIndexVisual); 
+                }
+            });
+
+            const periodoSelect = document.getElementById('periodoActivoSelect');
+            if (periodoSelect) {
+                periodoSelect.addEventListener('change', (e) => { 
+                    this.periodoActivo = e.target.value;
+                    document.getElementById('contenedorDefinicionesAusencia').innerHTML = '';
+                    this.numAusenciaDefs = 0; 
+                    this.anadirBloqueAusencia(); 
+                    this.render(); // Render general para actualizar todo lo que dependa del periodo
+                });
+            } else {
+                 console.error("CRITICAL: periodoActivoSelect no encontrado en bindEvents.");
+            }
+
+            document.getElementById('exportBtn').addEventListener('click', () => this.exportData()); // MODIFIED TO CALL app.exportData
+            const importLabel = document.querySelector('label[for="importFile"]');
+            if (importLabel) {
+                 importLabel.addEventListener('click', () => document.getElementById('importFile').click());
+            }
+            document.getElementById('importFile').addEventListener('change', (e) => this.importData(e)); // MODIFIED TO CALL app.importData
+
+            document.getElementById('resultadoSustitucion').addEventListener('change', (e) => {
+                if (e.target.tagName === 'SELECT' && e.target.dataset.type === 'overrideSustituto') {
+                    this.handleManualSustitutoOverride(e.target);
+                }
+            });
+            document.getElementById('copiarTablaSustitucionesBtn').addEventListener('click', () => this.copiarTablaComoImagen('tablaSustitucionesAsignadas'));
+            
+            document.getElementById('btnAnadirAusencia').addEventListener('click', () => this.anadirBloqueAusencia());
+            
+            document.getElementById('contenedorDefinicionesAusencia').addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-quitar-ausencia')) {
+                    e.target.closest('.ausencia-definicion-bloque').remove();
+                }
+                if (e.target.type === 'checkbox' && e.target.classList.contains('todo-el-dia-checkbox')) { // Usar una clase específica
+                    const bloque = e.target.closest('.ausencia-definicion-bloque');
+                    if (bloque) {
+                        const horasCheckboxesEnBloque = bloque.querySelectorAll('.checkbox-container input[type="checkbox"][name^="horas-"]');
+                        horasCheckboxesEnBloque.forEach(cb => cb.checked = e.target.checked);
+                    }
+                }
+            });
+        },
+        
+        render() {
+            console.log("app.render() llamado. Periodo activo:", this.periodoActivo); // DEBUG
+            this.renderListaDocentes();
+            this.renderTablaHorarios(); 
+            this.renderLogSustituciones();
+            this.renderTablaSustitucionesAsignadasHoy();
+        },
+
+        renderPeriodoSelector() { 
+            console.log("renderPeriodoSelector() llamado."); // DEBUG
+            const select = document.getElementById('periodoActivoSelect');
+            if (!select) {
+                console.error("CRITICAL ERROR en renderPeriodoSelector: El elemento <select id='periodoActivoSelect'> NO FUE ENCONTRADO EN EL DOM.");
+                return; 
+            }
+            const currentValue = this.periodoActivo;
+            select.innerHTML = ''; 
+            for(const key in this.periodosLectivos) { 
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = this.periodosLectivos[key].nombre;
+                select.appendChild(option);
+            } 
+            select.value = currentValue; 
+            console.log("renderPeriodoSelector() finalizado. Valor seleccionado:", select.value); // DEBUG
+        },
+        renderDiaSelector() { 
+            const diaSelect = document.getElementById('diaSelect');
+            if (!diaSelect) { console.error("Selector de día no encontrado"); return; }
+            const diaVal = diaSelect.value; 
+            diaSelect.innerHTML = '<option value="">Selecciona día...</option>';
+            this.dias.forEach(dia => { diaSelect.innerHTML += `<option value="${dia}">${dia}</option>`; });
+            if (diaVal) diaSelect.value = diaVal;
+        },
+        
+        anadirBloqueAusencia() {
+            this.numAusenciaDefs++;
+            const idSuffix = this.numAusenciaDefs;
+            const contenedor = document.getElementById('contenedorDefinicionesAusencia');
+            if (!contenedor) {console.error("Contenedor para definiciones de ausencia no encontrado."); return;}
+            
+            const bloqueDiv = document.createElement('div');
+            bloqueDiv.className = 'ausencia-definicion-bloque';
+            bloqueDiv.id = `ausenciaBloque-${idSuffix}`;
+
+            let htmlInterno = `<div class="input-group">
+                                <label for="docenteAusenteSelect-${idSuffix}">Docente Ausente:</label>
+                                <select id="docenteAusenteSelect-${idSuffix}" class="docente-ausente-selector">
+                                    <option value="">Selecciona docente...</option>`;
+            this.datos.docentes.forEach((docente, index) => {
+                htmlInterno += `<option value="${index}">${docente.nombre}</option>`;
+            });
+            htmlInterno += `</select>
+                            <button type="button" class="btn-quitar-ausencia" title="Quitar esta definición de ausencia">X</button>
+                           </div>`;
+            
+            htmlInterno += `<div class="input-group">
+                                <label for="horasCheckboxContainer-${idSuffix}">Horas de Ausencia:</label>
+                                <div id="horasCheckboxContainer-${idSuffix}" class="checkbox-container">`;
+            htmlInterno += `<label class="todo-el-dia-label"><input type="checkbox" class="todo-el-dia-checkbox" name="todoElDia-${idSuffix}"> <strong>Todo el día</strong></label>`;
+            
+            const horasDelPeriodoActivo = this.periodosLectivos[this.periodoActivo].horas;
+            horasDelPeriodoActivo.forEach((horaVisual) => {
+                if (horaVisual.esLectiva && horaVisual.mapToMasterIndex !== -1 && !(this.periodoActivo === 'oct-may' && horaVisual.esExclusiva) ) {
+                    htmlInterno += `<label><input type="checkbox" name="horas-${idSuffix}" value="${horaVisual.mapToMasterIndex}"> ${horaVisual.nombre} (${horaVisual.horario})</label>`;
+                }
+            });
+            htmlInterno += `   </div>
+                           </div><hr style="border-top: 1px solid #eee;">`;
+            
+            bloqueDiv.innerHTML = htmlInterno;
+            contenedor.appendChild(bloqueDiv);
+        },
+
+
+getEtapaClase(asignatura) {
+            if (!asignatura) return "Desconocida";
+            const asignaturaLower = asignatura.toLowerCase();
+            if (asignaturaLower.includes("inf") || asignaturaLower.includes("años")) return "Infantil";
+            if (asignaturaLower.includes("pri") || /\b\d+[º°erdoútoavdoºª]+\b/.test(asignaturaLower)) return "Primaria";
+            return "Desconocida";
+        }, // No olvides la coma aquí
+
+        filtroComunDisponibilidad(docentePotencial, indexPotencial, docenteAusenteIndex, dia, masterHoraIdx, sustitutosOcupadosEnHora, globallyAbsentTeachersBySlot) {
+            if (!docentePotencial || !docentePotencial.horario || !docentePotencial.horario[dia] || !docentePotencial.horario[dia][masterHoraIdx]) {
+                return false;
+            }
+            const isLibreEnHorario = docentePotencial.horario[dia][masterHoraIdx].estado === 'Libre';
+            const isNotAlreadyOccupiedThisSlot = (!sustitutosOcupadosEnHora[masterHoraIdx] || !sustitutosOcupadosEnHora[masterHoraIdx].has(docentePotencial.nombre));
+            
+            const isPotencialSustitutoGloballyAbsent = globallyAbsentTeachersBySlot[masterHoraIdx] && 
+                                                    globallyAbsentTeachersBySlot[masterHoraIdx].has(indexPotencial);
+
+            return indexPotencial != docenteAusenteIndex &&
+                   isLibreEnHorario &&
+                   isNotAlreadyOccupiedThisSlot &&
+                   !isPotencialSustitutoGloballyAbsent;
+        },
+
+
+
+
+
+
+
+findAndAssignSustituto() {
+    console.log("findAndAssignSustituto llamado con nueva prelación y límite diario.");
+    const dia = document.getElementById('diaSelect').value;
+    if (!dia) {
+        alert("Por favor, selecciona un día para las ausencias.");
+        this.resultadosSustitucionActuales = [];
+        this.renderTablaSustitucionesAsignadasHoy();
+        this.renderResultadosSustitucion();
+        return;
+    }
+
+    const definicionesAusencia = [];
+    const bloquesAusencia = document.querySelectorAll('#contenedorDefinicionesAusencia .ausencia-definicion-bloque');
+
+    bloquesAusencia.forEach(bloque => {
+        const docenteSelect = bloque.querySelector('.docente-ausente-selector');
+        const docenteIndex = docenteSelect.value;
+        if (docenteIndex === "") return;
+
+        const horasCheckboxes = bloque.querySelectorAll('.checkbox-container input[type="checkbox"][name^="horas-"]:checked');
+        const horasMasterIndices = Array.from(horasCheckboxes).map(cb => parseInt(cb.value));
+        if (horasMasterIndices.length > 0) {
+            definicionesAusencia.push({
+                docenteIndex: parseInt(docenteIndex),
+                horasMasterIndices: horasMasterIndices
+            });
+        }
+    });
+
+    if (definicionesAusencia.length === 0) {
+        alert("Por favor, define al menos una ausencia completa o quita los bloques incompletos.");
+        this.resultadosSustitucionActuales = [];
+        this.renderTablaSustitucionesAsignadasHoy(); this.renderResultadosSustitucion();
+        return;
+    }
+
+    const globallyAbsentTeachersBySlot = {};
+    definicionesAusencia.forEach(def => {
+        def.horasMasterIndices.forEach(masterIdx => {
+            if (!globallyAbsentTeachersBySlot[masterIdx]) {
+                globallyAbsentTeachersBySlot[masterIdx] = new Set();
+            }
+            globallyAbsentTeachersBySlot[masterIdx].add(def.docenteIndex);
+        });
+    });
+
+    this.resultadosSustitucionActuales = [];
+    const logEntriesGlobales = [];
+    const sustitutosOcupadosEnHora = {}; // Para evitar asignar el mismo sustituto a dos ausencias SIMULTÁNEAS
+
+    // --- MODIFICACIÓN: Límite y contador de sustituciones diarias ---
+    const MAX_DAILY_SUBS = 2; // "A lo sumo dos"
+    const dailySubstitutionsCount = {};
+    this.datos.docentes.forEach(doc => {
+        dailySubstitutionsCount[doc.nombre] = 0; // Inicializar contador diario para esta ejecución
+    });
+    // --- FIN MODIFICACIÓN ---
+
+    definicionesAusencia.forEach(defAusencia => {
+        const docenteAusente = this.datos.docentes[defAusencia.docenteIndex];
+        if (!docenteAusente) { console.error("Docente ausente no encontrado para índice:", defAusencia.docenteIndex); return; }
+
+        defAusencia.horasMasterIndices.forEach(masterHoraIdx => {
+            if (masterHoraIdx === -1) return;
+
+            const celdaAusencia = docenteAusente.horario[dia][masterHoraIdx];
+            const horaDefMaster = this.periodosLectivos['oct-may'].horas.find(h => h.mapToMasterIndex === masterHoraIdx);
+            if (!horaDefMaster) { console.error(`Definición de hora maestra no encontrada para masterHoraIdx: ${masterHoraIdx}`); return; }
+
+            let nombreHoraDisplay = horaDefMaster.nombre;
+            let franjaHorariaDisplay = horaDefMaster.horario;
+            const horaVisualMatch = this.periodosLectivos[this.periodoActivo].horas.find(h => h.mapToMasterIndex === masterHoraIdx && (h.esLectiva || h.esExclusiva || h.esRecreoGuardia));
+            if (horaVisualMatch) {
+                nombreHoraDisplay = horaVisualMatch.nombre;
+                franjaHorariaDisplay = horaVisualMatch.horario;
+            }
+
+            let resultadoParaEstaHora = {
+                docenteAusenteNombre: docenteAusente.nombre,
+                docenteAusenteIndex: defAusencia.docenteIndex,
+                dia: dia,
+                horaMasterIndex: masterHoraIdx,
+                horaNombreDisplay: nombreHoraDisplay,
+                franjaHorariaDisplay: franjaHorariaDisplay,
+                asignaturaOriginal: (celdaAusencia && celdaAusencia.asignatura) ? celdaAusencia.asignatura : "N/A",
+                profesorSustitutoNombre: "Nadie disponible",
+                profesorSustitutoCargo: "",
+                disponiblesOriginalmente: [],
+                observacionesSustitucion: ""
+            };
+
+            if (celdaAusencia && celdaAusencia.estado === 'Clase' && !horaDefMaster.esExclusiva) {
+                const asignaturaLower = (celdaAusencia.asignatura || "").toLowerCase();
+                const grupoDetectado = (celdaAusencia.asignatura.match(/\b(\d+º[A-Z\d]*)\b/i) || [])[1] || (celdaAusencia.asignatura.match(/\b(\d+\s*AÑOS[A-Z\d]*)\b/i) || [])[1];
+
+                let sustitutoAsignado = null;
+                let faseDeAsignacion = ""; // Para depurar qué regla se aplicó
+
+                // 1. Lógica de Religión/Valores específica (como antes, esta es una sustitución muy particular)
+                if ((asignaturaLower.includes("religión") || asignaturaLower.includes("valores")) && grupoDetectado) {
+                    const asignaturaComplementaria = asignaturaLower.includes("religión") ? "valores" : "religión";
+                    const sustitutoReligionValores = this.datos.docentes.find((docentePotencial, indexPotencial) => {
+                        if (indexPotencial === defAusencia.docenteIndex) return false;
+                        if (sustitutosOcupadosEnHora[masterHoraIdx] && sustitutosOcupadosEnHora[masterHoraIdx].has(docentePotencial.nombre)) return false;
+                        const isPotencialSustitutoGloballyAbsent = globallyAbsentTeachersBySlot[masterHoraIdx] && globallyAbsentTeachersBySlot[masterHoraIdx].has(indexPotencial);
+                        if (isPotencialSustitutoGloballyAbsent) return false;
+                        const celdaPotencial = docentePotencial.horario[dia][masterHoraIdx];
+                        return celdaPotencial && celdaPotencial.estado === 'Clase' &&
+                               celdaPotencial.asignatura &&
+                               celdaPotencial.asignatura.toLowerCase().includes(asignaturaComplementaria) &&
+                               celdaPotencial.asignatura.includes(grupoDetectado);
+                    });
+
+                    if (sustitutoReligionValores) {
+                        sustitutoAsignado = sustitutoReligionValores;
+                        resultadoParaEstaHora.asignaturaOriginal = grupoDetectado + " (Todo el grupo)";
+                        faseDeAsignacion = "Religión/Valores Cruzada"; // No cuenta para el límite diario de la misma forma
+                        resultadoParaEstaHora.observacionesSustitucion = 'Sustitución cruzada Religión/Valores';
+                    }
+                }
+
+                // 2. Lógica de Prelación General (si no se asignó por Religión/Valores específico)
+                if (!sustitutoAsignado) {
+                    const etapaClaseAusente = this.getEtapaClase(celdaAusencia.asignatura);
+
+                    // --- MODIFICACIÓN: Helper para obtener candidatos que cumplen el límite diario ---
+                    const getCandidatesUnderLimit = (filterFnSpecific, baseSortFn = (a, b) => (a.sustitucionesHechas || 0) - (b.sustitucionesHechas || 0)) => {
+                        return this.datos.docentes
+                            .filter((docentePotencial, indexPotencial) => {
+                                // Chequeos comunes de disponibilidad
+                                if (!this.filtroComunDisponibilidad(docentePotencial, indexPotencial, defAusencia.docenteIndex, dia, masterHoraIdx, sustitutosOcupadosEnHora, globallyAbsentTeachersBySlot)) return false;
+                                // Chequeo del LÍMITE DIARIO
+                                if (dailySubstitutionsCount[docentePotencial.nombre] >= MAX_DAILY_SUBS) return false;
+                                return filterFnSpecific(docentePotencial, indexPotencial); // Criterios específicos de la fase
+                            })
+                            .sort(baseSortFn);
+                    };
+                    // --- FIN MODIFICACIÓN ---
+
+                    // Fase A: Profesores NO especialistas DE LA MISMA ETAPA, BAJO LÍMITE DIARIO
+                    let candidatosPoolA = getCandidatesUnderLimit((docentePotencial) => {
+                        const noEsEspecialista = docentePotencial.especialidadDocente !== "AL" &&
+                                                 docentePotencial.especialidadDocente !== "PT" &&
+                                                 docentePotencial.especialidadDocente !== "Religion";
+                        const esMismaEtapa = etapaClaseAusente === "Desconocida" ||
+                                           (docentePotencial.etapaDocente === etapaClaseAusente);
+                        return noEsEspecialista && esMismaEtapa;
+                    });
+
+                    if (candidatosPoolA.length > 0) {
+                        sustitutoAsignado = candidatosPoolA[0];
+                        faseDeAsignacion = "A: Gen. misma etapa (< Límite)";
+                    }
+
+                    // Fase B: Especialistas (AL/PT/Religión), BAJO LÍMITE DIARIO
+                    // (Se recurre a PT/AL si los de Fase A no están disponibles o alcanzaron su límite)
+                    if (!sustitutoAsignado) {
+                        let candidatosPoolB = getCandidatesUnderLimit((docentePotencial) => {
+                            return docentePotencial.especialidadDocente === "AL" ||
+                                   docentePotencial.especialidadDocente === "PT" ||
+                                   docentePotencial.especialidadDocente === "Religion";
+                        });
+                        if (candidatosPoolB.length > 0) {
+                            sustitutoAsignado = candidatosPoolB[0];
+                            faseDeAsignacion = "B: Especialista (< Límite)";
+                        }
+                    }
+
+                    // Fase C: Etapa cruzada (NO especialistas), BAJO LÍMITE DIARIO
+                    if (!sustitutoAsignado && etapaClaseAusente !== "Desconocida" && etapaClaseAusente !== "Común") {
+                        let candidatosPoolC = getCandidatesUnderLimit((docentePotencial) => {
+                            const noEsEspecialista = docentePotencial.especialidadDocente !== "AL" &&
+                                                     docentePotencial.especialidadDocente !== "PT" &&
+                                                     docentePotencial.especialidadDocente !== "Religion";
+                            const noEsMismaEtapa = docentePotencial.etapaDocente !== etapaClaseAusente;
+                            return noEsEspecialista && noEsMismaEtapa;
+                        });
+                        if (candidatosPoolC.length > 0) {
+                            sustitutoAsignado = candidatosPoolC[0];
+                            faseDeAsignacion = "C: Gen. etapa distinta (< Límite)";
+                            resultadoParaEstaHora.observacionesSustitucion = "Sustitución cruzada (etapa distinta)";
+                        }
+                    }
+                } // Fin del bloque if (!sustitutoAsignado) para Lógica de Prelación General
+
+                resultadoParaEstaHora.disponiblesOriginalmente = this.datos.docentes
+                    .filter((dp, ip) => this.filtroComunDisponibilidad(dp, ip, defAusencia.docenteIndex, dia, masterHoraIdx, {}, globallyAbsentTeachersBySlot))
+                    .map(d => d.nombre);
+
+                if (sustitutoAsignado) {
+                    // Asegurarse de que este sustituto no está ya ocupado en ESTE MISMO SLOT por OTRA ausencia procesada antes
+                    if (!sustitutosOcupadosEnHora[masterHoraIdx] || !sustitutosOcupadosEnHora[masterHoraIdx].has(sustitutoAsignado.nombre)) {
+                        
+                        // --- MODIFICACIÓN: Incrementar contadores solo si se asigna ---
+                        if (!faseDeAsignacion.includes("Religión/Valores")) { // Las cruzadas de religión no suelen contar igual para el límite general
+                           dailySubstitutionsCount[sustitutoAsignado.nombre]++;
+                        }
+                        sustitutoAsignado.sustitucionesHechas = (sustitutoAsignado.sustitucionesHechas || 0) + 1;
+                        // --- FIN MODIFICACIÓN ---
+
+                        sustitutosOcupadosEnHora[masterHoraIdx] = sustitutosOcupadosEnHora[masterHoraIdx] || new Set();
+                        sustitutosOcupadosEnHora[masterHoraIdx].add(sustitutoAsignado.nombre);
+
+                        resultadoParaEstaHora.profesorSustitutoNombre = sustitutoAsignado.nombre;
+                        resultadoParaEstaHora.profesorSustitutoCargo = sustitutoAsignado.cargo || "";
+                        
+                        let currentObs = resultadoParaEstaHora.observacionesSustitucion || "";
+                        const ruleObs = `Regla: ${faseDeAsignacion}`;
+                        // Evitar duplicar la observación si ya estaba (ej. Religión/Valores o etapa cruzada)
+                        if (currentObs && !currentObs.includes(ruleObs.substring(0,10))) { // Comprobar inicio para evitar duplicados parciales
+                            resultadoParaEstaHora.observacionesSustitucion = `${currentObs}; ${ruleObs}`;
+                        } else if (!currentObs) {
+                            resultadoParaEstaHora.observacionesSustitucion = ruleObs;
+                        }
+
+
+                        logEntriesGlobales.push({
+                            fecha: new Date().toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                            docenteAusente: docenteAusente.nombre,
+                            profesorSustituto: sustitutoAsignado.nombre,
+                            periodo: `${dia}, ${nombreHoraDisplay} (${franjaHorariaDisplay})`,
+                            asignaturaSustituida: resultadoParaEstaHora.asignaturaOriginal,
+                            observaciones: resultadoParaEstaHora.observacionesSustitucion || 'Asignación automática'
+                        });
+                    } else {
+                        // Este caso significa que el 'sustitutoAsignado' fue elegido por la lógica,
+                        // pero ya estaba asignado a OTRA ausencia SIMULTÁNEA en este mismo slot.
+                        // Por lo tanto, para ESTA ausencia específica, no puede cubrirla.
+                        console.warn(`Sustituto ${sustitutoAsignado.nombre} ya ocupado en esta hora ${masterHoraIdx} por otra ausencia. Se marcará como Nadie Disponible para ESTA ausencia.`);
+                        resultadoParaEstaHora.profesorSustitutoNombre = "Nadie disponible (Opción preferida ya ocupada)";
+                        // No se incrementan contadores para ESTA asignación fallida.
+                    }
+                }
+            } else {
+                 resultadoParaEstaHora.profesorSustitutoNombre = (horaDefMaster.esExclusiva) ? "Exclusiva (No asignable)" : "No es clase/guardia asignable";
+                 resultadoParaEstaHora.observacionesSustitucion = (horaDefMaster.esExclusiva) ? "Franja de exclusiva" : "No lectiva o no asignable";
+            }
+            this.resultadosSustitucionActuales.push(resultadoParaEstaHora);
+        });
+    });
+
+    if (logEntriesGlobales.length > 0) {
+        this.datos.log.unshift(...logEntriesGlobales);
+        if (this.datos.log.length > 200) this.datos.log = this.datos.log.slice(0, 200);
+        this.saveData();
+        this.renderListaDocentes();
+        this.renderLogSustituciones();
+    }
+    this.renderResultadosSustitucion();
+    this.renderTablaSustitucionesAsignadasHoy();
+},
+
+
+
+
+
+// ... otras propiedades y métodos de app como init, saveData, loadData, resetData, bindEvents, render, etc.
+
+    // --- INICIO DEL BLOQUE A INSERTAR ---
+    exportData: function() {
+        const dataStr = JSON.stringify(this.datos);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        const exportFileDefaultName = 'cuadrante_sustituciones_datos.json';
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+        alert("Datos exportados.");
+    },
+
+    importData: function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+
+                    if (importedData && typeof importedData.docentes !== 'undefined' && typeof importedData.log !== 'undefined') {
+                        this.datos.docentes = importedData.docentes || [];
+                        this.datos.log = importedData.log || [];
+
+                        // (Aquí va la lógica de validación y adaptación de horarios de docentes importados,
+                        //  que ya tienes en tu loadData y que también estaba en la importData de v.25)
+                        this.datos.docentes.forEach(docente => {
+                            docente.sustitucionesHechas = docente.sustitucionesHechas || 0;
+                            docente.cargo = docente.cargo || "";
+                            // Asegurar estructura de horario y propiedades etapa/especialidad si es necesario
+                            docente.etapaDocente = docente.etapaDocente || "Primaria"; // Valor por defecto
+                            docente.especialidadDocente = docente.especialidadDocente || ""; // Valor por defecto
+
+                            const masterHorasDef = this.periodosLectivos['oct-may'].horas;
+                            let horarioNecesitaArreglo = !docente.horario;
+
+                            if (!horarioNecesitaArreglo) {
+                                for (const dia of this.dias) {
+                                    if (!docente.horario[dia] || Object.keys(docente.horario[dia]).length !== masterHorasDef.length) {
+                                        horarioNecesitaArreglo = true; break;
+                                    }
+                                    for (const horaMaster of masterHorasDef) {
+                                        const masterIdx = horaMaster.mapToMasterIndex;
+                                        if (!docente.horario[dia].hasOwnProperty(masterIdx) || typeof docente.horario[dia][masterIdx] !== 'object' || !docente.horario[dia][masterIdx].hasOwnProperty('estado')) {
+                                             horarioNecesitaArreglo = true; break;
+                                        }
+                                        if (docente.horario[dia][masterIdx].estado === "Guardia") { // Corrección si se importan "Guardias" antiguas
+                                            docente.horario[dia][masterIdx].estado = "Libre";
+                                            docente.horario[dia][masterIdx].asignatura = "";
+                                        }
+                                    }
+                                    if (horarioNecesitaArreglo) break;
+                                }
+                            }
+
+                            if (horarioNecesitaArreglo) {
+                                console.warn("Arreglando horario para docente importado:", docente.nombre);
+                                docente.horario = {};
+                                this.dias.forEach(dia => {
+                                    docente.horario[dia] = {};
+                                    masterHorasDef.forEach(horaMaster => {
+                                        docente.horario[dia][horaMaster.mapToMasterIndex] = { estado: "Libre", asignatura: "" };
+                                    });
+                                });
+                            }
+                        });
+                        this.datos.log.forEach(entry => { // Adaptación del log si es necesario
+                            if(entry.sustitucion && !entry.profesorSustituto) { 
+                                const partes = entry.sustitucion.split('→');
+                                entry.profesorSustituto = partes[0] ? partes[0].trim() : "N/D";
+                                entry.asignaturaSustituida = partes[1] ? partes[1].trim() : "N/D";
+                                delete entry.sustitucion;
+                            }
+                            entry.observaciones = entry.observaciones || "";
+                        });
+
+                        this.saveData();
+                        this.render(); 
+
+                        document.getElementById('contenedorDefinicionesAusencia').innerHTML = ''; // Limpiar definiciones de ausencia
+                        this.numAusenciaDefs = 0;
+                        this.anadirBloqueAusencia(); 
+
+                        alert('Datos importados correctamente.');
+                    } else {
+                        alert('Error: El archivo importado no tiene el formato esperado (faltan "docentes" o "log").');
+                    }
+                } catch (error) {
+                    console.error('Error al parsear el archivo JSON:', error);
+                    alert('Error al importar el archivo. Asegúrate de que es un archivo JSON válido y generado por esta aplicación.');
+                }
+            };
+            reader.onerror = () => {
+                alert('Error al leer el archivo.');
+            };
+            reader.readAsText(file);
+        }
+        // Limpiar el valor del input para permitir importar el mismo archivo de nuevo si es necesario
+        if (event && event.target) {
+            event.target.value = null;
+        }
+    },
+    // --- FIN DEL BLOQUE A INSERTAR ---
+
+copiarTablaComoImagen: function(idTabla) {
+    const tabla = document.getElementById(idTabla);
+    if (!tabla) {
+        alert("No se encontró la tabla a copiar.");
+        return;
+    }
+
+    html2canvas(tabla).then(canvas => {
+        canvas.toBlob(blob => {
+            if (!blob) {
+                alert("No se pudo generar la imagen.");
+                return;
+            }
+
+            // Copiar al portapapeles como imagen
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item])
+                .then(() => {
+                    alert("Tabla copiada como imagen al portapapeles.");
+                })
+                .catch(err => {
+                    console.error("Error al copiar al portapapeles:", err);
+                    alert("Error al copiar la imagen al portapapeles. Asegúrate de usar un navegador compatible.");
+                });
+        });
+    });
+}
+
+
+        // Las funciones renderTablaSustitucionesAsignadasHoy, renderTablaHorarios, renderLogSustituciones, renderListaDocentes
+        // están definidas más abajo, fuera del bloque principal del objeto app.
+    };
+
+app.addDocente = function() {
+        const nombreInput = document.getElementById('nombreDocenteInput');
+        const cargoInput = document.getElementById('cargoDocenteInput');
+        const etapaInput = document.getElementById('etapaDocenteInput'); // Nuevo
+        const especialidadInput = document.getElementById('especialidadDocenteInput'); // Nuevo
+
+        const nombre = nombreInput.value.trim();
+        const cargo = cargoInput.value.trim();
+        const etapaDocente = etapaInput.value; // Nuevo
+        const especialidadDocente = especialidadInput.value; // Nuevo
+
+        if (nombre && !this.datos.docentes.find(d => d.nombre.toLowerCase() === nombre.toLowerCase())) {
+            const nuevoHorario = {};
+            const masterHorasDef = this.periodosLectivos['oct-may'].horas; // Usar 'oct-may' como base para la estructura completa
+            this.dias.forEach(dia => {
+                nuevoHorario[dia] = {};
+                masterHorasDef.forEach(horaMaster => { 
+                    nuevoHorario[dia][horaMaster.mapToMasterIndex] = { estado: "Libre", asignatura: "" }; 
+                });
+            });
+            this.datos.docentes.push({ 
+                nombre, 
+                cargo, 
+                horario: nuevoHorario, 
+                sustitucionesHechas: 0,
+                etapaDocente: etapaDocente, // Guardar etapa
+                especialidadDocente: especialidadDocente // Guardar especialidad
+            });
+            this.saveData(); 
+            this.render(); // render actualizará la lista de docentes y los selectores de ausencia
+
+            // Actualizar selectores de docente ausente en los bloques de definición de ausencia
+            document.querySelectorAll('.docente-ausente-selector').forEach(select => {
+                const currentVal = select.value;
+                select.innerHTML = '<option value="">Selecciona docente...</option>';
+                this.datos.docentes.forEach((doc, idx) => {
+                    select.innerHTML += `<option value="${idx}">${doc.nombre}</option>`;
+                });
+                select.value = currentVal; 
+            });
+
+            nombreInput.value = ''; 
+            cargoInput.value = '';
+            // Opcional: resetear los nuevos selects a sus valores por defecto
+            etapaInput.value = 'Primaria'; 
+            especialidadInput.value = '';
+
+        } else if (!nombre) { 
+            alert("Por favor, introduce un nombre."); 
+        } else { 
+            alert("Este docente ya existe."); 
+        }
+    };
+app.editarDocente = function(indexStr) {
+        const index = parseInt(indexStr);
+        const docente = this.datos.docentes[index];
+        if (!docente) return;
+
+        const nuevoNombre = prompt(`Editar nombre para "${docente.nombre}":`, docente.nombre);
+        if (nuevoNombre === null) return; 
+        const nombreTrimmed = nuevoNombre.trim();
+        if (!nombreTrimmed) { alert("El nombre no puede estar vacío."); return; }
+        if (nombreTrimmed.toLowerCase() !== docente.nombre.toLowerCase() &&
+            this.datos.docentes.some((d, i) => i !== index && d.nombre.toLowerCase() === nombreTrimmed.toLowerCase())) {
+            alert("Ya existe otro docente con ese nombre."); return;
+        }
+
+        const nuevoCargo = prompt(`Editar cargo para "${nombreTrimmed}":`, docente.cargo || "");
+        if (nuevoCargo === null) return; 
+
+        // Para etapa y especialidad, sería mejor una UI más amigable, pero prompt puede servir temporalmente
+        // o asumir que se editan desde una interfaz más completa si la desarrollas.
+        // Aquí, vamos a mostrar cómo se podrían pedir con prompts, aunque no es lo ideal para selects.
+        const nuevaEtapa = prompt(`Editar Etapa Principal para "${nombreTrimmed}" (Infantil/Primaria):`, docente.etapaDocente || "Primaria");
+        if (nuevaEtapa === null) return;
+        if (nuevaEtapa !== "Infantil" && nuevaEtapa !== "Primaria") {
+            alert("Etapa no válida. Debe ser 'Infantil' o 'Primaria'.");
+            return;
+        }
+
+        const nuevaEspecialidad = prompt(`Editar Especialidad para "${nombreTrimmed}" (AL/PT o dejar vacío):`, docente.especialidadDocente || "");
+        if (nuevaEspecialidad === null) return;
+        if (nuevaEspecialidad !== "" && nuevaEspecialidad !== "AL" && nuevaEspecialidad !== "PT") {
+            alert("Especialidad no válida. Debe ser 'AL', 'PT' o estar vacía.");
+            return;
+        }
+
+        docente.nombre = nombreTrimmed;
+        docente.cargo = nuevoCargo.trim();
+        docente.etapaDocente = nuevaEtapa; // Guardar nueva etapa
+        docente.especialidadDocente = nuevaEspecialidad.toUpperCase(); // Guardar nueva especialidad (asegurar mayúsculas para AL/PT)
+        
+        this.saveData(); 
+        this.render(); // Actualiza todas las vistas
+
+        // Actualizar selectores de docente ausente
+        document.querySelectorAll('.docente-ausente-selector').forEach(select => {
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">Selecciona docente...</option>';
+            this.datos.docentes.forEach((doc, idx) => {
+                select.innerHTML += `<option value="${idx}">${doc.nombre}</option>`;
+            });
+            // Re-seleccionar el valor si aún es válido, o limpiar si el índice ya no existe.
+            if (this.datos.docentes[currentVal]) {
+                 select.value = currentVal;
+            } else {
+                 select.value = "";
+            }
+        });
+        alert("Docente actualizado.");
+    };
+    app.moverDocente = function(indexStr, direccion) {
+        const index = parseInt(indexStr);
+        const newIndex = index + direccion;
+        if (newIndex < 0 || newIndex >= this.datos.docentes.length) return; 
+        const [docenteMovido] = this.datos.docentes.splice(index, 1);
+        this.datos.docentes.splice(newIndex, 0, docenteMovido);
+        this.saveData(); this.render();
+        document.querySelectorAll('.docente-ausente-selector').forEach(select => {
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">Selecciona docente...</option>';
+            this.datos.docentes.forEach((doc, idx) => {
+                select.innerHTML += `<option value="${idx}">${doc.nombre}</option>`;
+            });
+            select.value = currentVal;
+        });
+    };
+    app.removeDocente = function(indexStr) { 
+        const index = parseInt(indexStr);
+        if (confirm(`¿Eliminar a ${this.datos.docentes[index].nombre}?`)) { 
+            this.datos.docentes.splice(index, 1); this.saveData(); this.render(); 
+            document.querySelectorAll('.docente-ausente-selector').forEach(select => {
+                const currentVal = select.value;
+                select.innerHTML = '<option value="">Selecciona docente...</option>';
+                this.datos.docentes.forEach((doc, idx) => {
+                    select.innerHTML += `<option value="${idx}">${doc.nombre}</option>`;
+                });
+                if(this.datos.docentes[currentVal]) select.value = currentVal; else select.value = "";
+            });
+        } 
+    };
+    app.updateCell = function(docenteIndex, dia, horaIndexVisual) {
+        const horaDefPeriodoActivo = this.periodosLectivos[this.periodoActivo].horas[horaIndexVisual];
+        if (!horaDefPeriodoActivo) { console.error("Definición de hora no encontrada para índice visual:", horaIndexVisual); return; }
+
+        if (!horaDefPeriodoActivo.esLectiva) {
+             if (!(this.periodoActivo === 'oct-may' && horaDefPeriodoActivo.esExclusiva)) { return; }
+        }
+        if (this.periodoActivo === 'oct-may' && horaDefPeriodoActivo.esExclusiva) {
+            alert("La franja de Exclusiva no se puede modificar."); return;
+        }
+        const masterHoraIndex = horaDefPeriodoActivo.mapToMasterIndex;
+        if (masterHoraIndex === -1) return;
+        const cellData = this.datos.docentes[docenteIndex].horario[dia][masterHoraIndex];
+        if(!cellData) { console.error("Datos de celda no encontrados:", docenteIndex, dia, masterHoraIndex); return; }
+        const promptTitle = horaDefPeriodoActivo.esRecreoGuardia ? "Zona de guardia/tarea para Recreo:" : "Asignatura y grupo:";
+        const nombreDocente = this.datos.docentes[docenteIndex].nombre;
+        if (cellData.estado === 'Libre') {
+            cellData.estado = 'Clase';
+            const asignaturaActual = cellData.asignatura || "";
+            const nuevaAsignatura = prompt(`${promptTitle}\n${nombreDocente} (${dia} - ${horaDefPeriodoActivo.nombre} ${horaDefPeriodoActivo.horario}):`, asignaturaActual);
+            if (nuevaAsignatura !== null) { cellData.asignatura = nuevaAsignatura.trim(); }
+            else { cellData.estado = 'Libre'; cellData.asignatura = ""; }
+        } else { 
+            cellData.estado = 'Libre'; cellData.asignatura = "";
+        }
+        this.saveData(); this.renderTablaHorarios();
+    };
+
+
+
+app.renderResultadosSustitucion = function() {
+    const resultadoDiv = document.getElementById('resultadoSustitucion'); //
+    if (!resultadoDiv) { console.error("Div #resultadoSustitucion no encontrado"); return; } //
+    resultadoDiv.innerHTML = ''; //
+    if (this.resultadosSustitucionActuales.length === 0) { //
+        resultadoDiv.innerHTML = "<p>No hay resultados de asignación para modificar o mostrar.</p>"; //
+        return; //
+    }
+
+    const resultadosAgrupados = this.resultadosSustitucionActuales.reduce((acc, res) => { //
+        if (!acc[res.docenteAusenteNombre]) { //
+            acc[res.docenteAusenteNombre] = { dia: res.dia, sustituciones: [] }; //
+        }
+        acc[res.docenteAusenteNombre].sustituciones.push(res); //
+        return acc; //
+    }, {});
+
+    let htmlGeneral = ''; //
+    if (Object.keys(resultadosAgrupados).length === 0 && this.resultadosSustitucionActuales.length > 0) { //
+        htmlGeneral = "<p>No se encontraron sustituciones asignables para las ausencias definidas.</p>"; //
+    } else if (Object.keys(resultadosAgrupados).length === 0) { //
+            htmlGeneral = "<p>Define y procesa ausencias para ver y modificar asignaciones.</p>"; //
+    } else {
+        for (const nombreAusente in resultadosAgrupados) { //
+            const dataAusente = resultadosAgrupados[nombreAusente]; //
+            htmlGeneral += `<h4>Modificar Asignaciones para ${nombreAusente} el ${dataAusente.dia}:</h4>
+                        <table><thead><tr><th>Sesión (Hora)</th><th>Tarea/Asignatura</th><th>Sustituto Asignado</th></tr></thead><tbody>`; //
+            dataAusente.sustituciones.forEach((res) => { //
+                const originalIndex = this.resultadosSustitucionActuales.findIndex(originalRes => //
+                    originalRes.docenteAusenteNombre === res.docenteAusenteNombre &&
+                    originalRes.horaMasterIndex === res.horaMasterIndex &&
+                    originalRes.dia === res.dia
+                );
+                htmlGeneral += `<tr>
+                                    <td>${res.horaNombreDisplay} <small>(${res.franjaHorariaDisplay})</small></td>
+                                    <td>${res.asignaturaOriginal}</td>
+                                    <td>`; //
+                if (res.profesorSustitutoNombre.includes("(No asignable)") || res.profesorSustitutoNombre === "No es clase/guardia asignable") { //
+                    htmlGeneral += res.profesorSustitutoNombre; //
+                } else {
+                    htmlGeneral += `<select data-type="overrideSustituto" data-result-index="${originalIndex}"> //
+                                        <option value="${res.profesorSustitutoNombre}" selected>${res.profesorSustitutoNombre}</option>`; //
+                    res.disponiblesOriginalmente.forEach(disp => { //
+                        if (disp !== res.profesorSustitutoNombre) htmlGeneral += `<option value="${disp}">${disp}</option>`; //
+                    });
+                    if (res.profesorSustitutoNombre !== "Nadie disponible") { //
+                        htmlGeneral += `<option value="Nadie disponible">(Nadie disponible)</option>`; //
+                    }
+                    htmlGeneral += `</select>`; //
+                }
+                htmlGeneral += `</td></tr>`; //
+            });
+            htmlGeneral += `</tbody></table> <hr style="margin: 15px 0; border-color: #eee;">`; //
+        }
+    }
+    resultadoDiv.innerHTML = htmlGeneral; //
+};
+     
+
+app.renderTablaSustitucionesAsignadasHoy = function() {
+    const container = document.getElementById('tablaSustitucionesAsignadasHoyContainer');
+    if (!container) {
+        console.error("Contenedor #tablaSustitucionesAsignadasHoyContainer no encontrado");
+        return;
+    }
+    container.innerHTML = '';
+
+    let diaParaCabecera;
+    if (this.resultadosSustitucionActuales.length > 0 && this.resultadosSustitucionActuales[0].dia) {
+        diaParaCabecera = this.resultadosSustitucionActuales[0].dia;
+    } else {
+        const hoy = new Date();
+        let indiceHoy = hoy.getDay() - 1;
+        if (indiceHoy < 0 || indiceHoy >= this.dias.length) {
+            indiceHoy = 0;
+        }
+        diaParaCabecera = this.dias[indiceHoy];
+    }
+
+    const fecha = new Date();
+    const fechaFormateada = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear().toString().slice(-2)}`;
+    const cabeceraColumnaDia = `${diaParaCabecera} (${fechaFormateada})`;
+
+    // Aplicar estilo al encabezado aquí
+    let tablaHTML = `<table id="tablaSustitucionesAsignadas">
+                        <thead>
+                            <tr>
+                                <th style="background-color: #fdad00;">Sesión / Hora</th>
+                                <th style="background-color: #fdad00;">${cabeceraColumnaDia}</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+    const agrupadasPorHora = {};
+    this.resultadosSustitucionActuales.forEach(res => {
+        const horaDefMaster = this.periodosLectivos['oct-may'].horas.find(h => h.mapToMasterIndex === res.horaMasterIndex);
+        if (res.profesorSustitutoNombre === "No es clase/guardia asignable" ||
+            res.profesorSustitutoNombre.includes("(No asignable)") ||
+            (this.periodoActivo === 'oct-may' && horaDefMaster && horaDefMaster.esExclusiva)
+           ) {
+            return;
+        }
+        const clave = `${res.horaMasterIndex}`;
+        if (!agrupadasPorHora[clave]) {
+            agrupadasPorHora[clave] = {
+                sustituciones: []
+            };
+        }
+        agrupadasPorHora[clave].sustituciones.push(res);
+    });
+
+    const horasDelPeriodoDef = this.periodosLectivos[this.periodoActivo].horas;
+    let hasAnyRowBeenAdded = false;
+
+    if (!horasDelPeriodoDef || horasDelPeriodoDef.length === 0) {
+        container.innerHTML = '<p>No hay franjas horarias definidas para el periodo activo seleccionado.</p>';
+        return;
+    }
+
+    horasDelPeriodoDef.forEach(horaVisual => {
+        const esMostrable = horaVisual.esLectiva ||
+                            horaVisual.esRecreoGuardia ||
+                            (this.periodoActivo === 'oct-may' && horaVisual.esExclusiva);
+
+        if (!esMostrable) {
+            return;
+        }
+
+        hasAnyRowBeenAdded = true;
+        
+        let rowStyle = "";
+        if (horaVisual.esRecreoGuardia) {
+            // Usamos la variable CSS para el color de Recreo si está disponible, o el hexadecimal directo.
+            // El hexadecimal directo es más seguro para estilos en línea generados por JS.
+            rowStyle = " style=\"background-color: #a0c4ff;\""; // Azul pastel (coincide con --color-recreo-guardia)
+        } else if (this.periodoActivo === 'oct-may' && horaVisual.esExclusiva) {
+            rowStyle = ` style="background-color: #ffd9a8;"`; // Color para Exclusiva
+        }
+
+        tablaHTML += `<tr${rowStyle}><td>${horaVisual.nombre} (${horaVisual.horario})</td><td>`;
+
+        if (this.periodoActivo === 'oct-may' && horaVisual.esExclusiva) {
+            // Celda vacía para Exclusiva
+        } else {
+            const masterIdx = horaVisual.mapToMasterIndex;
+            const horaDataAgrupada = agrupadasPorHora[masterIdx];
+
+            if (horaDataAgrupada && horaDataAgrupada.sustituciones.length > 0) {
+                const texto = horaDataAgrupada.sustituciones.map(res => {
+                    let cargoIzquierda;
+                    if (res.profesorSustitutoNombre === "Nadie disponible") {
+                        cargoIzquierda = "Nadie disponible";
+                    } else if (res.profesorSustitutoCargo && res.profesorSustitutoCargo.trim() !== "") {
+                        cargoIzquierda = res.profesorSustitutoCargo;
+                    } else {
+                        cargoIzquierda = res.profesorSustitutoNombre; 
+                    }
+                    return `${cargoIzquierda} &rarr; ${res.asignaturaOriginal}`;
+                }).join('<br>');
+                tablaHTML += texto;
+            }
+        }
+        tablaHTML += `</td></tr>`;
+    });
+
+    tablaHTML += `</tbody></table>`;
+
+    if (!hasAnyRowBeenAdded) {
+        if (this.resultadosSustitucionActuales.length === 0 && !(this.periodoActivo === 'oct-may' && horasDelPeriodoDef.some(h => h.esExclusiva))) {
+             container.innerHTML = '<p>No hay sustituciones asignadas para mostrar para la última búsqueda.</p>';
+        } else {
+             container.innerHTML = '<p>No hay franjas horarias visibles o con asignaciones para el periodo y día seleccionado.</p>';
+        }
+    } else {
+        container.innerHTML = tablaHTML;
+    }
+};
+
+    app.renderTablaHorarios = function() {
+            const container = document.getElementById('horariosContainer');
+            if (!container) { console.error("Contenedor #horariosContainer no encontrado"); return; }
+            container.innerHTML = '';
+            const horasDelPeriodoActivo = this.periodosLectivos[this.periodoActivo].horas;
+
+            this.datos.docentes.forEach((docente, docenteIndex) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'docente-horario-wrapper';
+                let tablaHTML = `<h3>${docente.nombre} <small style="color:#555;font-weight:normal;">(${docente.cargo || 'Sin cargo'})</small></h3>
+                                 <table>`;
+                tablaHTML += '<thead><tr><th class="sesion-header">Sesión</th><th class="hora-intervalo-header">Hora</th>';
+                this.dias.forEach(dia => { tablaHTML += `<th>${dia}</th>`; });
+                tablaHTML += '</tr></thead><tbody>';
+
+                horasDelPeriodoActivo.forEach((horaVisual, indexVisualEnPeriodoActivo) => {
+                    tablaHTML += `<tr>
+                                    <td class="sesion-cell">${horaVisual.nombre}</td>
+                                    <td class="hora-intervalo-cell">${horaVisual.horario}</td>`;
+                    
+                    this.dias.forEach(dia => {
+                        let celdaHTML = '';
+                        if (this.periodoActivo === 'oct-may' && horaVisual.esExclusiva) {
+                            celdaHTML = `<td class="celda-exclusiva" title="Exclusiva (no modificable)">Exclusiva</td>`;
+                        } 
+                        else if (horaVisual.esRecreoGuardia) {
+                            const masterIdx = horaVisual.mapToMasterIndex;
+                            const cellData = docente.horario[dia][masterIdx];
+                            const estado = (cellData && cellData.estado) ? cellData.estado.toLowerCase() : 'libre';
+                            const claseCss = `horario-celda celda-recreo-guardia ${estado === 'clase' ? '' : 'celda-libre'}`;
+                            const tareaGuardia = (cellData && cellData.asignatura) ? cellData.asignatura : (estado === 'clase' ? 'GUARDIA' : 'Libre');
+                            celdaHTML = `<td class="${claseCss}" data-docente-index="${docenteIndex}" data-dia="${dia}" data-hora-index-visual="${indexVisualEnPeriodoActivo}" title="${tareaGuardia}">${tareaGuardia}</td>`;
+                        }
+                        else if (horaVisual.esLectiva && horaVisual.mapToMasterIndex !== -1) {
+                            const masterIdx = horaVisual.mapToMasterIndex;
+                            const cellData = docente.horario[dia][masterIdx];
+                            const estado = (cellData && cellData.estado) ? cellData.estado.toLowerCase() : 'libre';
+                            const claseCss = `horario-celda celda-${estado}`;
+                            const asignatura = (cellData && cellData.asignatura) ? cellData.asignatura : '';
+                            const textoCelda = (estado === 'clase' && asignatura) ? asignatura : ((cellData && cellData.estado) ? cellData.estado : 'Libre');
+                            celdaHTML = `<td class="${claseCss}" data-docente-index="${docenteIndex}" data-dia="${dia}" data-hora-index-visual="${indexVisualEnPeriodoActivo}" title="${textoCelda}">${textoCelda}</td>`;
+                        } 
+                        else if (!horaVisual.esLectiva && !horaVisual.esExclusiva && !horaVisual.esRecreoGuardia) {
+                            celdaHTML = `<td class="celda-no-lectiva-fija"></td>`;
+                        }
+                        else { 
+                            celdaHTML = `<td></td>`;
+                        }
+                        tablaHTML += celdaHTML;
+                    });
+                    tablaHTML += '</tr>';
+                });
+                tablaHTML += '</tbody></table>';
+                wrapper.innerHTML = tablaHTML;
+                container.appendChild(wrapper);
+            });
+        };
+    app.renderLogSustituciones = function() {
+            const logBody = document.getElementById('logSustitucionesBody');
+            if (!logBody) { console.error("Elemento #logSustitucionesBody no encontrado"); return; }
+            logBody.innerHTML = '';
+            (this.datos.log || []).forEach(entry => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${entry.fecha || 'N/D'}</td>
+                    <td>${entry.docenteAusente || 'N/D'}</td>
+                    <td>${entry.profesorSustituto || 'N/D'}</td>
+                    <td>${entry.periodo || 'N/D'}</td>
+                    <td>${entry.asignaturaSustituida || 'N/D'}</td>
+                    <td>${entry.observaciones || ''}</td>`;
+                logBody.appendChild(tr);
+            });
+        };
+    app.renderListaDocentes = function() { 
+            const lista = document.getElementById('listaDocentes'); 
+            const contador = document.getElementById('contadorDocentes');
+            if (!lista || !contador) { console.error("Elementos para lista de docentes no encontrados"); return; }
+            contador.textContent = this.datos.docentes.length; 
+            lista.innerHTML = ''; 
+            this.datos.docentes.forEach((docente, index) => { 
+                const li = document.createElement('li'); 
+                li.innerHTML = `
+                    <div class="docente-info">
+                        <strong>${docente.nombre}</strong>
+                        <span class="cargo">${docente.cargo || 'Sin cargo'} - <i>Sust.: ${docente.sustitucionesHechas || 0}</i></span>
+                    </div>
+                    <div class="acciones-docente">
+                        <button class="btn-mover-arriba" data-index="${index}" title="Mover arriba" ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="btn-mover-abajo" data-index="${index}" title="Mover abajo" ${index === this.datos.docentes.length - 1 ? 'disabled' : ''}>↓</button>
+                        <button class="btn-editar" data-index="${index}" title="Editar docente">Editar</button>
+                        <button class="btn-eliminar" data-index="${index}" title="Eliminar docente">Eliminar</button>
+                    </div>`; 
+                lista.appendChild(li); 
+            }); 
+        };
+
+
+    app.init();
+    window.cuadranteApp = app;
+});
+</script>
+
+</body>
+</html>
